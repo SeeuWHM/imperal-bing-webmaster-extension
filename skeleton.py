@@ -6,7 +6,7 @@ at 5 per the skeleton contract.
 from __future__ import annotations
 
 from app import ext
-from accounts import _active_api_key, bing_ready
+from bing_accounts import _active_api_key, bing_ready
 from bing_api import bing_get
 
 

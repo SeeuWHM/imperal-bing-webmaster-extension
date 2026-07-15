@@ -8,7 +8,7 @@ from __future__ import annotations
 from imperal_sdk import ui
 
 from app import ext
-from accounts import _active_api_key, bing_ready
+from bing_accounts import _active_api_key, bing_ready
 from bing_api import bing_get
 from response_models import build_page_list, build_query_list, build_traffic_stats
 

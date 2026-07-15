@@ -11,7 +11,7 @@ from __future__ import annotations
 from imperal_sdk.types import ActionResult
 
 from app import chat
-from accounts import _active_api_key
+from bing_accounts import _active_api_key
 from bing_api import bing_get
 from params import EmptyParams, SiteUrlParams
 from response_models import (

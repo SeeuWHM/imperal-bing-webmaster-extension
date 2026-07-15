@@ -78,5 +78,5 @@ ext.secret(
 @ext.health_check
 async def health(ctx) -> dict:
     """Report whether the user has at least one Bing Webmaster account connected."""
-    from accounts import bing_ready
+    from bing_accounts import bing_ready
     return {"status": "ok", "version": ext.version, "bing_connected": await bing_ready(ctx)}

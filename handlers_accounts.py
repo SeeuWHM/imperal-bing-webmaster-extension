@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from imperal_sdk.types import ActionResult
 
 from app import chat
-from accounts import (
+from bing_accounts import (
     _active_api_key, _add_account, _all_accounts, _disconnect_account, _mask, _switch_account,
 )
 from bing_api import bing_get

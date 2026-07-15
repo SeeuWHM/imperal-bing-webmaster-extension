@@ -12,7 +12,7 @@ from __future__ import annotations
 from imperal_sdk import ui
 
 from app import ext
-from accounts import _active_account, _all_accounts, bing_ready
+from bing_accounts import _active_account, _all_accounts, bing_ready
 from bing_api import bing_get
 
 _SHOWN_COLLAPSED = 8

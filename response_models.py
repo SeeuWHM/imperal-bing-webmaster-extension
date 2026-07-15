@@ -155,7 +155,7 @@ def build_site_list(rows: list[dict]) -> SiteList:
 
 
 def build_accounts_list(accounts: list[dict]) -> AccountsList:
-    from accounts import _mask
+    from bing_accounts import _mask
     return AccountsList(
         accounts=[
             AccountRecord(label=a.get("label", ""), masked_key=_mask(a.get("api_key", "")),

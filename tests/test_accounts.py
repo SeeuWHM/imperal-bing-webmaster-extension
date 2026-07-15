@@ -17,7 +17,7 @@ import pytest
 from imperal_sdk.testing import MockContext
 from imperal_sdk.testing.mock_secrets import MockSecretStore
 
-import accounts
+import bing_accounts as accounts
 
 
 def _ctx(initial: dict | None = None) -> MockContext:
