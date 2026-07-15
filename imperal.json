@@ -1,0 +1,635 @@
+{
+  "manifest_schema_version": 3,
+  "sdk_version": "5.9.6",
+  "app_id": "bing-webmaster-connector",
+  "version": "1.0.0",
+  "name": "Bing Webmaster Connector",
+  "description": "Bing Webmaster Tools search performance: which queries bring clicks and impressions on Bing, page-level and site-level traffic trends, your verified Bing sites. Connect your own Bing Webmaster API key (no OAuth needed) to see your own data here.",
+  "icon": "icon.svg",
+  "actions_explicit": true,
+  "system": false,
+  "capabilities": [
+    "Search Query Performance",
+    "Page Traffic Stats",
+    "Site Traffic Trends",
+    "Verified Sites"
+  ],
+  "tools": [
+    {
+      "name": "skeleton_refresh_bing_config",
+      "description": "Bing Webmaster connection status — whether the user has connected an API key",
+      "scopes": [],
+      "parameters": {}
+    },
+    {
+      "name": "skeleton_refresh_bing_sites",
+      "description": "The user's Bing Webmaster properties — site URL and verification status (up to 5 shown)",
+      "scopes": [],
+      "parameters": {}
+    },
+    {
+      "name": "connection_status",
+      "description": "Whether the user's own Bing Webmaster API key is connected. Use for: подключен ли Bing Webmaster, is my Bing account connected, connection status.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "connected": {
+            "default": false,
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "masked_key": {
+            "default": "",
+            "title": "Masked Key",
+            "type": "string"
+          }
+        },
+        "title": "ConnectionStatus",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "save_bing_key",
+      "description": "Connect a Bing Webmaster account by saving its API key. Validates the key against Bing (calls GetUserSites) before saving — rejects invalid keys with a clear message. Connecting again adds ANOTHER account rather than replacing the first — you can hold several Bing Webmaster accounts and switch between them.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:secret"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "bing_api_key": {
+            "description": "Your Bing Webmaster API key, from bing.com/webmasters -> Settings -> API Access -> Generate API Key",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Bing Api Key",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "description": "Optional display name for this account (e.g. 'Agency', 'Client X'). Auto-generated if omitted.",
+            "maxLength": 60,
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bing_api_key"
+        ],
+        "title": "SaveKeyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "masked_key": {
+            "default": "",
+            "title": "Masked Key",
+            "type": "string"
+          },
+          "is_active": {
+            "default": false,
+            "title": "Is Active",
+            "type": "boolean"
+          }
+        },
+        "title": "AccountRecord",
+        "type": "object"
+      },
+      "event": "bing.account.connected",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "list_bing_accounts",
+      "description": "List every Bing Webmaster account you've connected — label, masked key, which one is active. Use for: покажи мои аккаунты bing, list connected Bing accounts, which Bing Webmaster account is active.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "AccountRecord": {
+            "properties": {
+              "label": {
+                "default": "",
+                "title": "Label",
+                "type": "string"
+              },
+              "masked_key": {
+                "default": "",
+                "title": "Masked Key",
+                "type": "string"
+              },
+              "is_active": {
+                "default": false,
+                "title": "Is Active",
+                "type": "boolean"
+              }
+            },
+            "title": "AccountRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/$defs/AccountRecord"
+            },
+            "title": "Accounts",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "AccountsList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "switch_bing_account",
+      "description": "Switch which connected Bing Webmaster account is active — all following Bing calls (sites, queries, pages, traffic) use this account's key. Use for: переключи аккаунт bing, switch to Bing account X, use my other Bing key.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:secret"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "label": {
+            "description": "Account label (from list_bing_accounts)",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "AccountLabelParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "active": {
+            "default": "",
+            "title": "Active",
+            "type": "string"
+          }
+        },
+        "title": "AccountSwitched",
+        "type": "object"
+      },
+      "event": "bing.account.switched",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "disconnect_bing_account",
+      "description": "Disconnect ONE specific connected Bing Webmaster account by its label — removes only that key, other connected accounts are untouched. Use for: отключи аккаунт bing X, disconnect this Bing account, remove one Bing Webmaster key.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:secret"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "label": {
+            "description": "Account label (from list_bing_accounts)",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "AccountLabelParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "remaining": {
+            "default": 0,
+            "title": "Remaining",
+            "type": "integer"
+          }
+        },
+        "title": "AccountDisconnected",
+        "type": "object"
+      },
+      "event": "bing.account.disconnected",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "list_bing_sites",
+      "description": "List the Bing Webmaster properties (verified sites) the active Bing account can see. Use for: покажи мои сайты bing, list my Bing Webmaster sites, show verified Bing properties.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "No input required.",
+        "properties": {},
+        "title": "EmptyParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "SiteRecord": {
+            "properties": {
+              "site_url": {
+                "default": "",
+                "title": "Site Url",
+                "type": "string"
+              },
+              "is_verified": {
+                "default": false,
+                "title": "Is Verified",
+                "type": "boolean"
+              }
+            },
+            "title": "SiteRecord",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "sites": {
+            "items": {
+              "$ref": "#/$defs/SiteRecord"
+            },
+            "title": "Sites",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "SiteList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "top_queries",
+      "description": "The connected site's best-performing Bing search queries — clicks, impressions, average position. Weekly buckets, Bing gives all history it has (no date-range filter on this endpoint). Use for: топ запросы bing, top queries on Bing, какие запросы приводят трафик из Bing.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "site_url": {
+            "description": "One of your verified Bing Webmaster site URLs (from list_bing_sites), e.g. https://example.com/ — interpreted literally, never guessed or normalized.",
+            "title": "Site Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_url"
+        ],
+        "title": "SiteUrlParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "QueryRow": {
+            "description": "One row from GetQueryStats — Bing's weekly query-level performance.",
+            "properties": {
+              "query": {
+                "default": "",
+                "title": "Query",
+                "type": "string"
+              },
+              "clicks": {
+                "default": 0,
+                "title": "Clicks",
+                "type": "integer"
+              },
+              "impressions": {
+                "default": 0,
+                "title": "Impressions",
+                "type": "integer"
+              },
+              "avg_click_position": {
+                "default": 0.0,
+                "title": "Avg Click Position",
+                "type": "number"
+              },
+              "avg_impression_position": {
+                "default": 0.0,
+                "title": "Avg Impression Position",
+                "type": "number"
+              },
+              "date": {
+                "default": "",
+                "title": "Date",
+                "type": "string"
+              }
+            },
+            "title": "QueryRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "site_url": {
+            "default": "",
+            "title": "Site Url",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/$defs/QueryRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "QueryList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "top_pages",
+      "description": "The connected site's best-performing pages on Bing — clicks, impressions, average position per page. Weekly buckets, all history Bing has. Use for: топ страницы bing, top pages on Bing, which pages get Bing traffic.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "site_url": {
+            "description": "One of your verified Bing Webmaster site URLs (from list_bing_sites), e.g. https://example.com/ — interpreted literally, never guessed or normalized.",
+            "title": "Site Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_url"
+        ],
+        "title": "SiteUrlParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "PageRow": {
+            "description": "One row from GetPageStats — Bing's weekly page-level performance.",
+            "properties": {
+              "page": {
+                "default": "",
+                "title": "Page",
+                "type": "string"
+              },
+              "clicks": {
+                "default": 0,
+                "title": "Clicks",
+                "type": "integer"
+              },
+              "impressions": {
+                "default": 0,
+                "title": "Impressions",
+                "type": "integer"
+              },
+              "avg_click_position": {
+                "default": 0.0,
+                "title": "Avg Click Position",
+                "type": "number"
+              },
+              "avg_impression_position": {
+                "default": 0.0,
+                "title": "Avg Impression Position",
+                "type": "number"
+              },
+              "date": {
+                "default": "",
+                "title": "Date",
+                "type": "string"
+              }
+            },
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "site_url": {
+            "default": "",
+            "title": "Site Url",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "PageList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    },
+    {
+      "name": "traffic_stats",
+      "description": "Daily site-wide clicks + impressions trend for one site on Bing — a small trend chart, like the top of Bing's Search Performance report. Use for: трафик bing, bing traffic trend, daily Bing clicks and impressions.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "site_url": {
+            "description": "One of your verified Bing Webmaster site URLs (from list_bing_sites), e.g. https://example.com/ — interpreted literally, never guessed or normalized.",
+            "title": "Site Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_url"
+        ],
+        "title": "SiteUrlParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "TrafficRow": {
+            "description": "One row from GetRankAndTrafficStats — Bing's daily site-wide traffic.",
+            "properties": {
+              "date": {
+                "default": "",
+                "title": "Date",
+                "type": "string"
+              },
+              "clicks": {
+                "default": 0,
+                "title": "Clicks",
+                "type": "integer"
+              },
+              "impressions": {
+                "default": 0,
+                "title": "Impressions",
+                "type": "integer"
+              }
+            },
+            "title": "TrafficRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "site_url": {
+            "default": "",
+            "title": "Site Url",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/$defs/TrafficRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "TrafficStats",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "bing_webmaster"
+    }
+  ],
+  "signals": [],
+  "schedules": [],
+  "required_scopes": [],
+  "icon_size_bytes": 3682,
+  "lifecycle": {
+    "health_check": {
+      "interval_sec": 60
+    }
+  },
+  "secrets": [
+    {
+      "name": "bing_accounts",
+      "description": "Every Bing Webmaster account you've connected (JSON list of {label, api_key, is_active}) — lets you track multiple Bing Webmaster accounts and switch between them. Managed only through this extension's own connect/switch/disconnect actions.",
+      "required": false,
+      "write_mode": "extension",
+      "max_bytes": 8192,
+      "scope": "user"
+    }
+  ],
+  "panels": [
+    {
+      "panel_id": "secrets",
+      "slot": "right",
+      "title": "Secrets",
+      "tree": {},
+      "icon": "KeyRound",
+      "refresh": "manual",
+      "center_overlay": false
+    },
+    {
+      "panel_id": "bing_sidebar",
+      "slot": "left",
+      "title": "Bing Webmaster",
+      "tree": {},
+      "icon": "Search",
+      "refresh": "on_event:bing.account.connected,bing.account.switched,bing.account.disconnected",
+      "center_overlay": false,
+      "default_width": 260
+    },
+    {
+      "panel_id": "bing_add_account",
+      "slot": "overlay",
+      "title": "Add Bing account",
+      "tree": {},
+      "icon": "Plus",
+      "refresh": "manual",
+      "center_overlay": false
+    },
+    {
+      "panel_id": "bing_workspace",
+      "slot": "center",
+      "title": "Bing Webmaster",
+      "tree": {},
+      "icon": "Search",
+      "refresh": "manual",
+      "center_overlay": false
+    }
+  ]
+}

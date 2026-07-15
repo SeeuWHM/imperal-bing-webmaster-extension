@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: Bing Webmaster Tools API (as used by bing-webmaster-connector)
+  version: "1.0.0"
+  description: >
+    Subset of the real Bing Webmaster Tools JSON API that this extension calls
+    directly (no shared backend microservice — Bing's API is public, free,
+    and authenticated with a plain per-user API key, unlike Google Search
+    Console which requires OAuth). Base URL and auth confirmed against
+    Microsoft Learn (learn.microsoft.com/en-us/bingwebmaster/getting-access,
+    learn.microsoft.com/en-us/bingwebmaster/api-protocols) and the community
+    reference at bing-webmaster-api.analyticsedge.com. Response shapes below
+    are copied verbatim from real documented examples, not guessed.
+servers:
+  - url: https://ssl.bing.com/webmaster/api.svc/json
+paths:
+  /GetUserSites:
+    get:
+      summary: List every site verified/registered under this Bing Webmaster account.
+      parameters:
+        - name: apikey
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  d:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        __type: { type: string }
+                        Url: { type: string, example: "http://example.com/" }
+                        IsVerified: { type: boolean }
+                        AuthenticationCode: { type: string }
+                        DnsVerificationCode: { type: string }
+        "400":
+          description: Invalid/missing API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ErrorCode: { type: integer }
+                  Message: { type: string, example: "InvalidApiKey" }
+
+  /GetQueryStats:
+    get:
+      summary: Weekly query-level search performance for one site (Search Performance report).
+      parameters:
+        - name: apikey
+          in: query
+          required: true
+          schema: { type: string }
+        - name: siteUrl
+          in: query
+          required: true
+          schema: { type: string, example: "http://example.com/" }
+      responses:
+        "200":
+          description: OK — no date-range/limit params exist; Bing returns everything it has, weekly-bucketed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  d:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        __type: { type: string }
+                        Query: { type: string }
+                        Clicks: { type: integer }
+                        Impressions: { type: integer }
+                        AvgClickPosition: { type: number }
+                        AvgImpressionPosition: { type: number }
+                        Date: { type: string, example: "/Date(1699920000000)/" }
+
+  /GetPageStats:
+    get:
+      summary: Weekly page-level search performance for one site.
+      parameters:
+        - name: apikey
+          in: query
+          required: true
+          schema: { type: string }
+        - name: siteUrl
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  d:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        __type: { type: string }
+                        Query: { type: string, description: "Despite the field name, this is the PAGE URL for GetPageStats." }
+                        Clicks: { type: integer }
+                        Impressions: { type: integer }
+                        AvgClickPosition: { type: number }
+                        AvgImpressionPosition: { type: number }
+                        Date: { type: string }
+
+  /GetRankAndTrafficStats:
+    get:
+      summary: Daily Clicks/Impressions trend for one site (small trend-chart data).
+      parameters:
+        - name: apikey
+          in: query
+          required: true
+          schema: { type: string }
+        - name: siteUrl
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  d:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        __type: { type: string }
+                        Clicks: { type: integer }
+                        Impressions: { type: integer }
+                        Date: { type: string }
