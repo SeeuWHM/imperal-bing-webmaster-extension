@@ -1,5 +1,7 @@
 # Bing Webmaster Connector
 
+**Version:** v1.1.1 (`ef174d0`) · prod active v1.0.1 — redeploy pending · app_id `bing-webmaster-connector` · 11 tools · `pricing_model: per_action`
+
 Imperal Cloud extension — Bing search performance (queries, pages, traffic
 trend, verified sites) straight from the real Bing Webmaster Tools API.
 
@@ -19,10 +21,11 @@ loop either.
 
 Several Bing Webmaster accounts (each with its own API key) can be connected
 at once and switched between — same JSON-blob-in-`ctx.secrets` pattern as the
-SE Ranking connector (`accounts.py`, secret `bing_accounts`, `write_mode`
-`extension`). The sidebar panel lists every connected account with the
-active one marked; click any other to switch, or disconnect one without
-touching the rest.
+SE Ranking connector (`bing_accounts.py`, secret `bing_accounts`, `write_mode`
+`extension`). The sidebar panel lists every connected account with the active
+one marked; click any other to switch, disconnect one without touching the
+rest, or expand an **inline "Add another account" form** right in the sidebar
+(no separate overlay).
 
 ## Setup (for the end user)
 
@@ -39,9 +42,13 @@ touching the rest.
 
 Data appears once Bing has crawled/indexed the site. Bing's own retention
 window is roughly 6 months (vs GSC's ~16), and its API has **no date-range or
-limit parameters** — every query/page/traffic call always returns everything
-Bing currently has, weekly-bucketed for queries/pages and daily for the
-traffic trend. We never fabricate filtering it doesn't support.
+limit parameters** — every query/page/traffic call returns everything Bing
+currently has, weekly-bucketed for queries/pages and daily for the traffic
+trend. Because Bing returns one row **per query per week**, `top_queries` /
+`top_pages` **aggregate** those weekly buckets into one row per query/page
+(clicks + impressions summed, position = an impression-weighted average of
+`AvgImpressionPosition`), sorted by clicks — otherwise the raw feed is
+thousands of duplicated rows. We never fabricate filtering Bing doesn't support.
 
 ## Endpoints implemented
 
@@ -56,6 +63,13 @@ Field names deliberately mirror the Google Search Console connector's shape
 (`query`/`clicks`/`impressions`/`position`) so Webbee and the Article Writer
 extension see one consistent schema regardless of which search engine the
 data came from.
+
+> Note: Bing sets `AvgClickPosition = -1` for any bucket with zero clicks — we
+> never surface that as a position; the "Avg position" shown is the
+> impression-weighted `AvgImpressionPosition`. A `NotAuthorized` (code 14) from
+> Bing (a site owned by a *different* connected account) is translated into a
+> plain "pick a site from the active account, or switch account" message rather
+> than a raw API error.
 
 Full request/response contract: [`docs/bing-webmaster-api.openapi.yaml`](docs/bing-webmaster-api.openapi.yaml).
 
@@ -75,7 +89,7 @@ python -m venv .venv && .venv/bin/pip install imperal-sdk pytest pytest-asyncio
 .venv/bin/python -m pytest tests/ -v
 ```
 
-34 tests, no network calls — `accounts.py`'s multi-account logic, real Bing
-response-shape parsing (`response_models.py`, verbatim example payloads from
-Microsoft's own docs), and every chat-function handler (success + error
-paths) via `MockContext`/`MockSecretStore`.
+35 tests, no network calls — `bing_accounts.py`'s multi-account logic, real Bing
+response-shape parsing + weekly-bucket aggregation (`response_models.py`, verbatim
+example payloads from Microsoft's own docs), and every chat-function handler
+(success + error paths) via `MockContext`/`MockSecretStore`.
