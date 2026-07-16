@@ -20,6 +20,14 @@ def _bing_error(status_code: int, body: dict | None) -> str:
     body = body or {}
     msg = body.get("Message") or body.get("message") or ""
     code = body.get("ErrorCode")
+    # Code 14 = NotAuthorized: the active API key's Bing account doesn't own/verify
+    # this site. Almost always means a site from a DIFFERENT connected Bing account
+    # is still open after switching accounts — point the user back at the sidebar
+    # list (which only shows the active account's own verified sites).
+    if code == 14 or "notauthorized" in msg.lower():
+        return ("This Bing account isn't authorised to read that site's data — it usually belongs "
+                "to a different connected Bing account. Pick one of the sites on the left (those "
+                "belong to the active account), or switch to the account that owns this site.")
     if msg:
         return f"Bing Webmaster API error (HTTP {status_code}): {msg}" + (f" [code {code}]" if code is not None else "")
     return f"Bing Webmaster API error: HTTP {status_code}"

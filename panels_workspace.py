@@ -80,7 +80,8 @@ async def _traffic_section(ctx, key: str, site_url: str) -> ui.UINode:
     ])
 
 
-@ext.panel("bing_workspace", slot="center", title="Bing Webmaster", icon="Search")
+@ext.panel("bing_workspace", slot="center", title="Bing Webmaster", icon="Search",
+           refresh="on_event:bing.account.switched,bing.account.disconnected")
 async def workspace_panel(ctx, site_url: str = "", show_all: bool = False):
     if not await bing_ready(ctx):
         return ui.Empty(message="Connect your Bing Webmaster account first — run save_bing_key in chat.")

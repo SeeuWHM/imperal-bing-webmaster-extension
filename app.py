@@ -21,7 +21,7 @@ BING_API_BASE = "https://ssl.bing.com/webmaster/api.svc/json"
 
 ext = Extension(
     "bing-webmaster-connector",
-    version="1.1.0",
+    version="1.1.1",
     display_name="Bing Webmaster Connector",
     description=(
         "Bing Webmaster Tools search performance: which queries bring clicks "
