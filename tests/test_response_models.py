@@ -51,7 +51,29 @@ def test_build_query_list_maps_real_bing_shape():
     assert row.impressions == 1
     assert row.clicks == 0
     assert row.avg_impression_position == 27
-    assert row.date == "2023-11-14"
+    assert row.date == ""  # aggregated across weeks — no single bucket date
+
+
+def test_build_query_list_aggregates_weekly_buckets():
+    # Same query across weekly buckets must collapse to ONE row with summed
+    # clicks/impressions and an impression-weighted avg position — never the
+    # -1 that AvgClickPosition carries for zero-click weeks.
+    raw = [
+        {"Query": "free hosting", "Clicks": 0, "Impressions": 33,
+         "AvgClickPosition": -1, "AvgImpressionPosition": 10, "Date": "/Date(1699920000000)/"},
+        {"Query": "free hosting", "Clicks": 2, "Impressions": 39,
+         "AvgClickPosition": 3, "AvgImpressionPosition": 8, "Date": "/Date(1700524800000)/"},
+        {"Query": "cheap hosting", "Clicks": 5, "Impressions": 10,
+         "AvgClickPosition": 2, "AvgImpressionPosition": 4, "Date": "/Date(1700524800000)/"},
+    ]
+    result = build_query_list("https://example.com/", raw)
+    assert result.count == 2  # two unique queries, not three weekly rows
+    by_q = {r.query: r for r in result.rows}
+    fh = by_q["free hosting"]
+    assert fh.clicks == 2
+    assert fh.impressions == 72                    # 33 + 39
+    assert fh.avg_impression_position == 8.9       # (10*33 + 8*39) / 72, never -1
+    assert result.rows[0].query == "cheap hosting"  # sorted by clicks desc
 
 
 def test_build_query_list_empty():

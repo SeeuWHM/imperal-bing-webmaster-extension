@@ -106,16 +106,55 @@ def _bing_date(raw: str) -> str:
         return raw
 
 
+def _aggregate_perf(rows: list[dict], key_field: str) -> list[dict]:
+    """Collapse Bing's WEEKLY buckets into one row per query/page.
+
+    GetQueryStats / GetPageStats return the same query once per week, so the raw
+    feed is thousands of duplicated rows. We sum clicks & impressions across all
+    weeks and compute an IMPRESSION-weighted average position from
+    AvgImpressionPosition — the real "where did we rank" number. (AvgClickPosition
+    is -1 whenever a week had zero clicks, which is why the raw feed showed -1
+    almost everywhere — it is NOT a position, so we never surface it as one.)
+    Sorted by clicks, then impressions, descending."""
+    agg: dict[str, dict] = {}
+    for r in rows:
+        key = r.get(key_field, "") or ""
+        clicks = int(r.get("Clicks", 0) or 0)
+        impressions = int(r.get("Impressions", 0) or 0)
+        imp_pos = float(r.get("AvgImpressionPosition", 0) or 0)
+        clk_pos = float(r.get("AvgClickPosition", 0) or 0)
+        a = agg.setdefault(key, {
+            "key": key, "clicks": 0, "impressions": 0,
+            "_pos_num": 0.0, "_pos_den": 0, "_clk_num": 0.0, "_clk_den": 0,
+        })
+        a["clicks"] += clicks
+        a["impressions"] += impressions
+        if imp_pos > 0 and impressions > 0:      # weight position by impressions
+            a["_pos_num"] += imp_pos * impressions
+            a["_pos_den"] += impressions
+        if clk_pos > 0 and clicks > 0:           # click position only where clicks exist
+            a["_clk_num"] += clk_pos * clicks
+            a["_clk_den"] += clicks
+    out = []
+    for a in agg.values():
+        out.append({
+            "key": a["key"], "clicks": a["clicks"], "impressions": a["impressions"],
+            "avg_impression_position": round(a["_pos_num"] / a["_pos_den"], 1) if a["_pos_den"] else 0.0,
+            "avg_click_position": round(a["_clk_num"] / a["_clk_den"], 1) if a["_clk_den"] else 0.0,
+        })
+    out.sort(key=lambda x: (x["clicks"], x["impressions"]), reverse=True)
+    return out
+
+
 def build_query_list(site_url: str, rows: list[dict]) -> QueryList:
     qrows = [
         QueryRow(
-            query=r.get("Query", ""), clicks=r.get("Clicks", 0),
-            impressions=r.get("Impressions", 0),
-            avg_click_position=r.get("AvgClickPosition", 0.0),
-            avg_impression_position=r.get("AvgImpressionPosition", 0.0),
-            date=_bing_date(r.get("Date", "")),
+            query=a["key"], clicks=a["clicks"], impressions=a["impressions"],
+            avg_click_position=a["avg_click_position"],
+            avg_impression_position=a["avg_impression_position"],
+            date="",  # aggregated across all weeks — no single bucket date
         )
-        for r in rows
+        for a in _aggregate_perf(rows, "Query")
     ]
     return QueryList(site_url=site_url, rows=qrows, count=len(qrows))
 
@@ -123,14 +162,13 @@ def build_query_list(site_url: str, rows: list[dict]) -> QueryList:
 def build_page_list(site_url: str, rows: list[dict]) -> PageList:
     prows = [
         PageRow(
-            page=r.get("Query", ""),  # Bing's GetPageStats reuses the QueryStats shape; "Query" holds the page URL here
-            clicks=r.get("Clicks", 0),
-            impressions=r.get("Impressions", 0),
-            avg_click_position=r.get("AvgClickPosition", 0.0),
-            avg_impression_position=r.get("AvgImpressionPosition", 0.0),
-            date=_bing_date(r.get("Date", "")),
+            page=a["key"],  # Bing's GetPageStats reuses the QueryStats shape; "Query" holds the page URL
+            clicks=a["clicks"], impressions=a["impressions"],
+            avg_click_position=a["avg_click_position"],
+            avg_impression_position=a["avg_impression_position"],
+            date="",
         )
-        for r in rows
+        for a in _aggregate_perf(rows, "Query")
     ]
     return PageList(site_url=site_url, rows=prows, count=len(prows))
 

@@ -18,17 +18,10 @@ from bing_api import bing_get
 _SHOWN_COLLAPSED = 8
 
 
-def _connect_form(error: str = "") -> ui.UINode:
-    children = [
-        ui.Header(text="Bing Webmaster", level=4),
-        ui.Badge(label="○ not connected", color="gray"),
-        ui.Divider(),
-        ui.Text(content=(
-            "Connect your Bing Webmaster API key to see your site's Bing search "
-            "performance here — queries, pages, traffic trend. You can connect "
-            "more than one account and switch between them below."
-        ), variant="body"),
-    ]
+def _key_form(error: str = "") -> list[ui.UINode]:
+    """The API-key entry form itself — reused by the not-connected prompt and by
+    the inline "add another account" block, so both stay in sync."""
+    children = []
     if error:
         children.append(ui.Alert(message=error, type="error"))
     children.append(ui.Form(
@@ -43,7 +36,21 @@ def _connect_form(error: str = "") -> ui.UINode:
         content="Get your key at bing.com/webmasters → Settings → API Access → Generate API Key.",
         variant="caption",
     ))
-    return ui.Stack(children=children)
+    return children
+
+
+def _connect_form(error: str = "") -> ui.UINode:
+    return ui.Stack(children=[
+        ui.Header(text="Bing Webmaster", level=4),
+        ui.Badge(label="○ not connected", color="gray"),
+        ui.Divider(),
+        ui.Text(content=(
+            "Connect your Bing Webmaster API key to see your site's Bing search "
+            "performance here — queries, pages, traffic trend. You can connect "
+            "more than one account and switch between them below."
+        ), variant="body"),
+        *_key_form(error),
+    ])
 
 
 def _account_items(accounts: list[dict]) -> list[ui.UINode]:
@@ -69,7 +76,7 @@ def _account_items(accounts: list[dict]) -> list[ui.UINode]:
 @ext.panel("bing_sidebar", slot="left", title="Bing Webmaster", icon="Search",
            default_width=260,
            refresh="on_event:bing.account.connected,bing.account.switched,bing.account.disconnected")
-async def sidebar_panel(ctx, show_all: bool = False):
+async def sidebar_panel(ctx, show_all: bool = False, show_add: bool = False):
     if not await bing_ready(ctx):
         return _connect_form()
 
@@ -116,8 +123,17 @@ async def sidebar_panel(ctx, show_all: bool = False):
         ui.Divider(),
         ui.Text(content=f"Accounts ({len(accounts)})", variant="caption"),
         ui.List(items=_account_items(accounts)) if accounts else ui.Empty(message="No accounts"),
+        # Inline add-account form (expands in place — same proven mechanism as
+        # the "+N more" toggle; replaces the old overlay panel that never opened).
+        ui.Stack(children=[
+            ui.Divider(),
+            ui.Text(content="Add another Bing account", variant="caption"),
+            *_key_form(),
+            ui.Button(label="Cancel", variant="ghost", size="sm",
+                      on_click=ui.Call("__panel__bing_sidebar", show_add=False)),
+        ]) if show_add else
         ui.Button(label="Add another Bing account", icon="Plus", variant="outline",
-                  on_click=ui.Call("__panel__bing_add_account")),
+                  on_click=ui.Call("__panel__bing_sidebar", show_add=True)),
         ui.Divider(),
         ui.Stats(children=[
             ui.Stat(label="Sites", value=str(len(rows)), icon="Globe"),
@@ -129,10 +145,3 @@ async def sidebar_panel(ctx, show_all: bool = False):
     ])
     root.props["auto_action"] = ui.Call("__panel__bing_workspace").to_dict()
     return root
-
-
-@ext.panel("bing_add_account", slot="overlay", title="Add Bing account", icon="Plus")
-async def add_account_panel(ctx, error: str = ""):
-    """Overlay form to connect an ADDITIONAL Bing Webmaster account without
-    losing the sidebar's already-connected list underneath it."""
-    return _connect_form(error=error)
