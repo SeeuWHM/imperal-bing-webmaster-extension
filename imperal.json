@@ -29,7 +29,7 @@
     },
     {
       "name": "connection_status",
-      "description": "Whether the user's own Bing Webmaster API key is connected. Use for: подключен ли Bing Webmaster, is my Bing account connected, connection status.",
+      "description": "Whether the user's own Bing Webmaster API key is connected. Use for: is my Bing account connected, connection status.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -123,7 +123,7 @@
     },
     {
       "name": "list_bing_accounts",
-      "description": "List every Bing Webmaster account you've connected — label, masked key, which one is active. Use for: покажи мои аккаунты bing, list connected Bing accounts, which Bing Webmaster account is active.",
+      "description": "List every Bing Webmaster account you've connected — label, masked key, which one is active. Use for: list connected Bing accounts, which Bing Webmaster account is active.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -183,7 +183,7 @@
     },
     {
       "name": "switch_bing_account",
-      "description": "Switch which connected Bing Webmaster account is active — all following Bing calls (sites, queries, pages, traffic) use this account's key. Use for: переключи аккаунт bing, switch to Bing account X, use my other Bing key.",
+      "description": "Switch which connected Bing Webmaster account is active — all following Bing calls (sites, queries, pages, traffic) use this account's key. Use for: switch to Bing account X, use my other Bing key.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -223,7 +223,7 @@
     },
     {
       "name": "disconnect_bing_account",
-      "description": "Disconnect ONE specific connected Bing Webmaster account by its label — removes only that key, other connected accounts are untouched. Use for: отключи аккаунт bing X, disconnect this Bing account, remove one Bing Webmaster key.",
+      "description": "Disconnect ONE specific connected Bing Webmaster account by its label — removes only that key, other connected accounts are untouched. Use for: disconnect this Bing account, remove one Bing Webmaster key.",
       "action_type": "destructive",
       "chain_callable": true,
       "effects": [
@@ -268,7 +268,7 @@
     },
     {
       "name": "list_bing_sites",
-      "description": "List the Bing Webmaster properties (verified sites) the active Bing account can see. Use for: покажи мои сайты bing, list my Bing Webmaster sites, show verified Bing properties.",
+      "description": "List the Bing Webmaster properties (verified sites) the active Bing account can see. Use for: list my Bing Webmaster sites, show verified Bing properties.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -323,7 +323,7 @@
     },
     {
       "name": "top_queries",
-      "description": "The connected site's best-performing Bing search queries — clicks, impressions, average position. Weekly buckets, Bing gives all history it has (no date-range filter on this endpoint). Use for: топ запросы bing, top queries on Bing, какие запросы приводят трафик из Bing.",
+      "description": "The connected site's best-performing Bing search queries — clicks, impressions, average position. Weekly buckets, Bing gives all history it has (no date-range filter on this endpoint). Use for: top queries on Bing.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -412,7 +412,7 @@
     },
     {
       "name": "top_pages",
-      "description": "The connected site's best-performing pages on Bing — clicks, impressions, average position per page. Weekly buckets, all history Bing has. Use for: топ страницы bing, top pages on Bing, which pages get Bing traffic.",
+      "description": "The connected site's best-performing pages on Bing — clicks, impressions, average position per page. Weekly buckets, all history Bing has. Use for: top pages on Bing, which pages get Bing traffic.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],
@@ -501,7 +501,7 @@
     },
     {
       "name": "traffic_stats",
-      "description": "Daily site-wide clicks + impressions trend for one site on Bing — a small trend chart, like the top of Bing's Search Performance report. Use for: трафик bing, bing traffic trend, daily Bing clicks and impressions.",
+      "description": "Daily site-wide clicks + impressions trend for one site on Bing — a small trend chart, like the top of Bing's Search Performance report. Use for: bing traffic trend, daily Bing clicks and impressions.",
       "action_type": "read",
       "chain_callable": true,
       "effects": [],

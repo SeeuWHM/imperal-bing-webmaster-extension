@@ -44,9 +44,8 @@ chat = ChatExtension(
     tool_name="bing_webmaster",
     description=(
         "Bing Webmaster Tools — search performance data from Bing (not "
-        "Google). Use for: bing запросы, top queries on Bing, какие запросы "
-        "приводят трафик из Bing, page traffic stats on Bing, Bing search "
-        "console, verified Bing sites."
+        "Google). Use for: top queries on Bing, page traffic stats on Bing, "
+        "Bing search console, verified Bing sites."
     ),
     max_rounds=10,
 )

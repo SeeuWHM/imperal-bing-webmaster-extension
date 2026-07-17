@@ -29,7 +29,7 @@ from response_models import (
     "connection_status", action_type="read", chain_callable=True, data_model=ConnectionStatus,
     description=(
         "Whether the user's own Bing Webmaster API key is connected. Use for: "
-        "подключен ли Bing Webmaster, is my Bing account connected, connection status."
+        "is my Bing account connected, connection status."
     ),
 )
 async def fn_connection_status(ctx, params: EmptyParams) -> ActionResult:
@@ -74,8 +74,8 @@ async def fn_save_bing_key(ctx, params: SaveKeyParams) -> ActionResult:
     "list_bing_accounts", action_type="read", chain_callable=True, data_model=AccountsList,
     description=(
         "List every Bing Webmaster account you've connected — label, masked key, which "
-        "one is active. Use for: покажи мои аккаунты bing, list connected Bing accounts, "
-        "which Bing Webmaster account is active."
+        "one is active. Use for: list connected Bing accounts, which Bing Webmaster "
+        "account is active."
     ),
 )
 async def fn_list_bing_accounts(ctx, params: EmptyParams) -> ActionResult:
@@ -92,7 +92,7 @@ async def fn_list_bing_accounts(ctx, params: EmptyParams) -> ActionResult:
     description=(
         "Switch which connected Bing Webmaster account is active — all following Bing "
         "calls (sites, queries, pages, traffic) use this account's key. Use for: "
-        "переключи аккаунт bing, switch to Bing account X, use my other Bing key."
+        "switch to Bing account X, use my other Bing key."
     ),
 )
 async def fn_switch_bing_account(ctx, params: AccountLabelParams) -> ActionResult:
@@ -112,8 +112,8 @@ async def fn_switch_bing_account(ctx, params: AccountLabelParams) -> ActionResul
     effects=["delete:secret"], data_model=AccountDisconnected,
     description=(
         "Disconnect ONE specific connected Bing Webmaster account by its label — removes "
-        "only that key, other connected accounts are untouched. Use for: отключи аккаунт "
-        "bing X, disconnect this Bing account, remove one Bing Webmaster key."
+        "only that key, other connected accounts are untouched. Use for: disconnect this "
+        "Bing account, remove one Bing Webmaster key."
     ),
 )
 async def fn_disconnect_bing_account(ctx, params: AccountLabelParams) -> ActionResult:

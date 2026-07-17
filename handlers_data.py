@@ -31,8 +31,7 @@ async def _require_key(ctx) -> str:
     "list_bing_sites", action_type="read", chain_callable=True, data_model=SiteList,
     description=(
         "List the Bing Webmaster properties (verified sites) the active Bing account can "
-        "see. Use for: покажи мои сайты bing, list my Bing Webmaster sites, show verified "
-        "Bing properties."
+        "see. Use for: list my Bing Webmaster sites, show verified Bing properties."
     ),
 )
 async def fn_list_bing_sites(ctx, params: EmptyParams) -> ActionResult:
@@ -52,8 +51,7 @@ async def fn_list_bing_sites(ctx, params: EmptyParams) -> ActionResult:
     description=(
         "The connected site's best-performing Bing search queries — clicks, impressions, "
         "average position. Weekly buckets, Bing gives all history it has (no date-range "
-        "filter on this endpoint). Use for: топ запросы bing, top queries on Bing, какие "
-        "запросы приводят трафик из Bing."
+        "filter on this endpoint). Use for: top queries on Bing."
     ),
 )
 async def fn_top_queries(ctx, params: SiteUrlParams) -> ActionResult:
@@ -72,8 +70,8 @@ async def fn_top_queries(ctx, params: SiteUrlParams) -> ActionResult:
     "top_pages", action_type="read", chain_callable=True, data_model=PageList,
     description=(
         "The connected site's best-performing pages on Bing — clicks, impressions, average "
-        "position per page. Weekly buckets, all history Bing has. Use for: топ страницы "
-        "bing, top pages on Bing, which pages get Bing traffic."
+        "position per page. Weekly buckets, all history Bing has. Use for: top pages on "
+        "Bing, which pages get Bing traffic."
     ),
 )
 async def fn_top_pages(ctx, params: SiteUrlParams) -> ActionResult:
@@ -92,8 +90,8 @@ async def fn_top_pages(ctx, params: SiteUrlParams) -> ActionResult:
     "traffic_stats", action_type="read", chain_callable=True, data_model=TrafficStats,
     description=(
         "Daily site-wide clicks + impressions trend for one site on Bing — a small trend "
-        "chart, like the top of Bing's Search Performance report. Use for: трафик bing, "
-        "bing traffic trend, daily Bing clicks and impressions."
+        "chart, like the top of Bing's Search Performance report. Use for: bing traffic "
+        "trend, daily Bing clicks and impressions."
     ),
 )
 async def fn_traffic_stats(ctx, params: SiteUrlParams) -> ActionResult:
