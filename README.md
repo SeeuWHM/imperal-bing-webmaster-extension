@@ -1,9 +1,34 @@
 # Bing Webmaster Connector
 
-**Version:** v1.1.1 (`ef174d0`) · prod active v1.0.1 — redeploy pending · app_id `bing-webmaster-connector` · 11 tools · `pricing_model: per_action`
+[![Imperal SDK](https://img.shields.io/badge/imperal--sdk-5.9-blue)](https://pypi.org/project/imperal-sdk/)
+[![Version](https://img.shields.io/badge/version-1.1.1-green)](https://github.com/SeeuWHM/imperal-bing-webmaster-extension/releases)
+[![License](https://img.shields.io/badge/license-LGPL--2.1-orange)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Imperal%20Cloud-purple)](https://panel.imperal.io)
 
-Imperal Cloud extension — Bing search performance (queries, pages, traffic
-trend, verified sites) straight from the real Bing Webmaster Tools API.
+**Bing search performance extension for [Imperal Cloud](https://panel.imperal.io).**
+
+Queries, pages, traffic trend, and verified sites — straight from the real Bing Webmaster Tools API, no OAuth required.
+
+---
+
+## What It Does
+
+Talk to it naturally:
+
+```
+"show my top queries on webhostmost.com"
+"how's my Bing traffic trending this month"
+"which pages are getting impressions but no clicks"
+"list my verified Bing sites"
+"connect my Bing Webmaster account"
+"switch to my other Bing account"
+```
+
+Or use the sidebar panel — every connected account is listed with the active
+one marked; switch, disconnect, or add another account inline without leaving
+the workspace.
+
+---
 
 ## Why this is simpler than Google Search Console
 
@@ -82,7 +107,7 @@ Full request/response contract: [`docs/bing-webmaster-api.openapi.yaml`](docs/bi
 - `switch_bing_account` — make a different connected account active.
 - `disconnect_bing_account` — remove one connected account, others untouched.
 
-## Tests
+## Development / Tests
 
 ```bash
 python -m venv .venv && .venv/bin/pip install imperal-sdk pytest pytest-asyncio
@@ -93,3 +118,10 @@ python -m venv .venv && .venv/bin/pip install imperal-sdk pytest pytest-asyncio
 response-shape parsing + weekly-bucket aggregation (`response_models.py`, verbatim
 example payloads from Microsoft's own docs), and every chat-function handler
 (success + error paths) via `MockContext`/`MockSecretStore`.
+
+---
+
+## Built with
+
+- [imperal-sdk](https://github.com/imperalcloud/imperal-sdk) 5.9
+- [Imperal Cloud](https://panel.imperal.io)
