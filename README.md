@@ -1,6 +1,6 @@
 # Bing Webmaster Connector
 
-[![Imperal SDK](https://img.shields.io/badge/imperal--sdk-5.9-blue)](https://pypi.org/project/imperal-sdk/)
+[![Imperal SDK](https://img.shields.io/badge/imperal--sdk-5.9.9-blue)](https://pypi.org/project/imperal-sdk/)
 [![Version](https://img.shields.io/badge/version-1.1.1-green)](https://github.com/SeeuWHM/imperal-bing-webmaster-extension/releases)
 [![License](https://img.shields.io/badge/license-LGPL--2.1-orange)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Imperal%20Cloud-purple)](https://panel.imperal.io)
@@ -123,5 +123,5 @@ example payloads from Microsoft's own docs), and every chat-function handler
 
 ## Built with
 
-- [imperal-sdk](https://github.com/imperalcloud/imperal-sdk) 5.9
+- [imperal-sdk](https://github.com/imperalcloud/imperal-sdk) 5.9.9
 - [Imperal Cloud](https://panel.imperal.io)
