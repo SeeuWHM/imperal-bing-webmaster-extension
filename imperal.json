@@ -1,8 +1,8 @@
 {
   "manifest_schema_version": 3,
-  "sdk_version": "5.9.6",
+  "sdk_version": "5.9.9",
   "app_id": "bing-webmaster-connector",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "name": "Bing Webmaster Connector",
   "description": "Bing Webmaster Tools search performance: which queries bring clicks and impressions on Bing, page-level and site-level traffic trends, your verified Bing sites. Connect your own Bing Webmaster API key (no OAuth needed) to see your own data here.",
   "icon": "icon.svg",
@@ -614,21 +614,12 @@
       "default_width": 260
     },
     {
-      "panel_id": "bing_add_account",
-      "slot": "overlay",
-      "title": "Add Bing account",
-      "tree": {},
-      "icon": "Plus",
-      "refresh": "manual",
-      "center_overlay": false
-    },
-    {
       "panel_id": "bing_workspace",
       "slot": "center",
       "title": "Bing Webmaster",
       "tree": {},
       "icon": "Search",
-      "refresh": "manual",
+      "refresh": "on_event:bing.account.switched,bing.account.disconnected",
       "center_overlay": false
     }
   ]
