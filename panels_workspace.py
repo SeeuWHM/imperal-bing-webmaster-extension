@@ -5,20 +5,27 @@ tokens) — same shape as GSC/SE Ranking's workspace panels.
 """
 from __future__ import annotations
 
+import asyncio
+
 from imperal_sdk import ui
 
 from app import ext
 from bing_accounts import _active_api_key, bing_ready
 from bing_api import bing_get
+from cache_helpers import ANALYTICS_CACHE_TTL, cached_call
 from response_models import build_page_list, build_query_list, build_traffic_stats
 
 _SHOWN = 50   # unique queries/pages shown before "Load more"
 
 
 async def _queries_section(ctx, key: str, site_url: str, show_all: bool = False) -> ui.UINode:
-    try:
+    async def _fetch() -> list[dict]:
         data = await bing_get(ctx, key, "GetQueryStats", {"siteUrl": site_url})
-        rows = build_query_list(site_url, data.get("d") or []).rows   # aggregated, dupes gone
+        return data.get("d") or []
+
+    try:
+        raw = await cached_call(ctx, "queries", key, {"site_url": site_url}, ANALYTICS_CACHE_TTL, _fetch)
+        rows = build_query_list(site_url, raw).rows   # aggregated, dupes gone
     except Exception as e:
         return ui.Alert(message=str(e), type="error")
     shown = rows if show_all else rows[:_SHOWN]
@@ -40,9 +47,13 @@ async def _queries_section(ctx, key: str, site_url: str, show_all: bool = False)
 
 
 async def _pages_section(ctx, key: str, site_url: str, show_all: bool = False) -> ui.UINode:
-    try:
+    async def _fetch() -> list[dict]:
         data = await bing_get(ctx, key, "GetPageStats", {"siteUrl": site_url})
-        rows = build_page_list(site_url, data.get("d") or []).rows   # aggregated, dupes gone
+        return data.get("d") or []
+
+    try:
+        raw = await cached_call(ctx, "pages", key, {"site_url": site_url}, ANALYTICS_CACHE_TTL, _fetch)
+        rows = build_page_list(site_url, raw).rows   # aggregated, dupes gone
     except Exception as e:
         return ui.Alert(message=str(e), type="error")
     shown = rows if show_all else rows[:_SHOWN]
@@ -64,9 +75,13 @@ async def _pages_section(ctx, key: str, site_url: str, show_all: bool = False) -
 
 
 async def _traffic_section(ctx, key: str, site_url: str) -> ui.UINode:
-    try:
+    async def _fetch() -> list[dict]:
         data = await bing_get(ctx, key, "GetRankAndTrafficStats", {"siteUrl": site_url})
-        rows = build_traffic_stats(site_url, data.get("d") or []).rows
+        return data.get("d") or []
+
+    try:
+        raw = await cached_call(ctx, "traffic", key, {"site_url": site_url}, ANALYTICS_CACHE_TTL, _fetch)
+        rows = build_traffic_stats(site_url, raw).rows
     except Exception as e:
         return ui.Alert(message=str(e), type="error")
     total_clicks = sum(r.clicks for r in rows)
@@ -89,9 +104,9 @@ async def workspace_panel(ctx, site_url: str = "", show_all: bool = False):
         return ui.Empty(message="Pick a site on the left to see its queries, pages and traffic trend.")
 
     key = await _active_api_key(ctx)
-    queries, pages, traffic = (
-        await _queries_section(ctx, key, site_url, show_all),
-        await _pages_section(ctx, key, site_url, show_all),
-        await _traffic_section(ctx, key, site_url),
+    queries, pages, traffic = await asyncio.gather(
+        _queries_section(ctx, key, site_url, show_all),
+        _pages_section(ctx, key, site_url, show_all),
+        _traffic_section(ctx, key, site_url),
     )
     return ui.Stack(children=[traffic, ui.Divider(), queries, ui.Divider(), pages])

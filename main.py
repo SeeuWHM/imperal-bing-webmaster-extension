@@ -9,6 +9,7 @@ sys.path.insert(0, _dir)
 
 for _m in list(sys.modules):
     if _m in ("app", "bing_accounts", "bing_api", "params", "response_models",
+              "cache_helpers",
               "skeleton", "handlers_accounts", "handlers_data",
               "panels", "panels_workspace"):
         del sys.modules[_m]

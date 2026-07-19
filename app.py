@@ -21,7 +21,7 @@ BING_API_BASE = "https://ssl.bing.com/webmaster/api.svc/json"
 
 ext = Extension(
     "bing-webmaster-connector",
-    version="1.1.1",
+    version="1.2.0",
     display_name="Bing Webmaster Connector",
     description=(
         "Bing Webmaster Tools search performance: which queries bring clicks "
@@ -72,6 +72,13 @@ ext.secret(
     scope="user",
     max_bytes=8192,
 )(lambda: None)
+
+
+# ctx.cache — short-lived (platform-capped 5-300s) per-user cache so the
+# sidebar site-list and workspace queries/pages/traffic panels don't re-hit
+# ssl.bing.com on every render. See cache_helpers.py.
+from cache_helpers import CachedBingPayload  # noqa: E402
+ext.cache_model("bing_payload")(CachedBingPayload)
 
 
 @ext.health_check

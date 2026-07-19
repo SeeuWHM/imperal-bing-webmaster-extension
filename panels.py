@@ -14,6 +14,7 @@ from imperal_sdk import ui
 from app import ext
 from bing_accounts import _active_account, _all_accounts, bing_ready
 from bing_api import bing_get
+from cache_helpers import SITES_CACHE_TTL, cached_call
 
 _SHOWN_COLLAPSED = 8
 
@@ -85,9 +86,12 @@ async def sidebar_panel(ctx, show_all: bool = False, show_add: bool = False):
     active_label = (active or {}).get("label", "")
     active_key = (active or {}).get("api_key", "")
 
-    try:
+    async def _fetch_sites() -> list[dict]:
         data = await bing_get(ctx, active_key, "GetUserSites")
-        rows = data.get("d") or []
+        return data.get("d") or []
+
+    try:
+        rows = await cached_call(ctx, "sites", active_key, None, SITES_CACHE_TTL, _fetch_sites)
     except Exception as e:
         # A stored key Bing now rejects (revoked/expired) drops back to the
         # connect prompt with the real reason, not a dead-end error card.
